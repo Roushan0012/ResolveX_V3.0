@@ -23,7 +23,7 @@ const Header = () => {
           <div className="rounded-full bg-primary p-2">
             <Leaf className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold text-foreground">Eco-Citizen Hub</span>
+          <span className="text-xl font-bold text-foreground">SUDHAAR</span>
         </Link>
 
         {/* Desktop Navigation */}
