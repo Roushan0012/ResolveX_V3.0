@@ -18,6 +18,8 @@ import AccessibilityControls from "@/components/AccessibilityControls";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext"; // Import useAuth hook
 import { LoginButton } from "@/components/LoginButton"; // Import LoginButton
+import sudharLogo from "@/assets/sudhaar_logo.png";
+
 
 // US EPA AQI Breakpoints for PM2.5
 function calculateAqiPm25(pm25: number) {
@@ -176,10 +178,12 @@ const Header: React.FC = () => {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2 transition-base hover:opacity-80">
-            <div className="rounded-full bg-primary p-2">
-              <Leaf className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-foreground">SUDHAAR</span>
+            
+            <img
+    src={sudharLogo}
+    alt="Sudhar Logo"
+    className="h-48 w-auto object-contain"
+  />
           </Link>
           <AQIMeter /> {/* Your AQI meter is included here */}
         </div>
