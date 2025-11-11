@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-// Dummy Waste Report Data
+// Dummy Data: Waste
 const wasteReports = [
   {
     id: 1,
@@ -15,6 +15,10 @@ const wasteReports = [
       "Large pile of garbage dumped near homes, causing bad smell and attracting animals. Needs immediate municipal cleaning to avoid diseases.",
     status: "Pending",
     progress: 1,
+    history: [
+      { date: "2025-01-15", update: "Report submitted by user" },
+      { date: "2025-01-16", update: "Assigned to waste management department" },
+    ],
   },
   {
     id: 2,
@@ -25,6 +29,11 @@ const wasteReports = [
       "Plastic bottles and wrappers blocking roadside drainage, which may cause waterlogging and increase mosquito breeding.",
     status: "In Progress",
     progress: 2,
+    history: [
+      { date: "2025-01-14", update: "Report submitted" },
+      { date: "2025-01-15", update: "Municipal team dispatched" },
+      { date: "2025-01-16", update: "Cleanup in progress" },
+    ],
   },
   {
     id: 3,
@@ -35,10 +44,15 @@ const wasteReports = [
       "Dustbin is overflowing and trash is spreading nearby. Municipal team has been notified for clearance.",
     status: "Verified",
     progress: 3,
+    history: [
+      { date: "2025-01-12", update: "Report submitted" },
+      { date: "2025-01-13", update: "Cleanup completed" },
+      { date: "2025-01-14", update: "Verified by city official" },
+    ],
   },
 ];
 
-// Dummy Water Report Data
+// Dummy Data: Water
 const waterReports = [
   {
     id: 1,
@@ -49,6 +63,10 @@ const waterReports = [
       "Significant amount of floating waste. Water is dark and foul smelling, possibly mixed with sewage. Needs urgent cleaning.",
     status: "Pending",
     progress: 1,
+    history: [
+      { date: "2025-01-10", update: "Report submitted" },
+      { date: "2025-01-11", update: "Forwarded to water department" },
+    ],
   },
   {
     id: 2,
@@ -59,6 +77,10 @@ const waterReports = [
       "Tap water has bad smell and yellow tint. Water samples collected and testing underway by authorities.",
     status: "In Progress",
     progress: 2,
+    history: [
+      { date: "2025-01-12", update: "Report submitted" },
+      { date: "2025-01-13", update: "Water testing in progress" },
+    ],
   },
   {
     id: 3,
@@ -69,129 +91,202 @@ const waterReports = [
       "Oil patches floating in lake. Environmental team responded and cleaned most affected areas.",
     status: "Verified",
     progress: 3,
+    history: [
+      { date: "2025-01-14", update: "Reported by citizen" },
+      { date: "2025-01-15", update: "Cleanup operation completed" },
+      { date: "2025-01-16", update: "Verified by authority" },
+    ],
   },
 ];
 
+// Color for badge
 const getStatusColor = (status: string) => {
   if (status === "Verified") return "bg-green-600";
   if (status === "In Progress") return "bg-blue-500";
   return "bg-yellow-500";
 };
 
-// ✅ Small compact progress bar inside details only
-const ProgressBar = ({ progress }: { progress: number }) => (
-  <div className="w-full bg-gray-300 rounded-full h-1 mt-2 mx-auto">
-    <div
-      className="bg-green-600 h-1 rounded-full transition-all"
-      style={{
-        width: progress === 1 ? "33%" : progress === 2 ? "66%" : "100%",
-      }}
-    ></div>
-  </div>
-);
+// 🔹 Vertical Timeline Tracker (like delivery tracking)
+const StatusTracker = ({ progress }: { progress: number }) => {
+  const steps = [
+    { title: "Reported", desc: "Your issue has been reported." },
+    { title: "In Progress", desc: "Our team is working on it." },
+    { title: "Verified", desc: "Issue resolved and verified." },
+  ];
+
+  return (
+    <div className="relative mt-5 border-l-4 border-gray-200 ml-3">
+      {steps.map((step, index) => {
+        const isActive = progress >= index + 1;
+        const isLast = index === steps.length - 1;
+
+        return (
+          <div key={index} className="relative pl-6 pb-6 last:pb-0">
+            {/* Dot */}
+            <div
+              className={`absolute -left-[11px] w-4 h-4 rounded-full border-4 ${
+                isActive
+                  ? "bg-green-600 border-green-200"
+                  : "bg-gray-300 border-gray-100"
+              }`}
+            ></div>
+
+            {/* Connector line */}
+            {!isLast && (
+              <div
+                className={`absolute left-0 top-4 w-[2px] h-full ${
+                  isActive ? "bg-green-500" : "bg-gray-200"
+                }`}
+              ></div>
+            )}
+
+            <div className="ml-2">
+              <p
+                className={`font-semibold text-sm ${
+                  isActive ? "text-green-700" : "text-gray-500"
+                }`}
+              >
+                {step.title}
+              </p>
+              <p className="text-xs text-gray-500">{step.desc}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 export default function TrackReports() {
-  const [openWaste, setOpenWaste] = useState<number | null>(null);
-  const [openWater, setOpenWater] = useState<number | null>(null);
+  const [openReport, setOpenReport] = useState<number | null>(null);
+  const [category, setCategory] = useState<string>("All");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const allReports = [
+    ...wasteReports.map((r) => ({ ...r, type: "Waste" })),
+    ...waterReports.map((r) => ({ ...r, type: "Water" })),
+  ];
+
+  const filteredReports =
+    category === "All"
+      ? allReports
+      : category === "Waste"
+      ? wasteReports.map((r) => ({ ...r, type: "Waste" }))
+      : waterReports.map((r) => ({ ...r, type: "Water" }));
+
+  const visibleReports = filteredReports.filter(
+    (r) =>
+      r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.location.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <>
       <Header />
+      <div className="container mx-auto p-6 mt-4">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Track Your <span className="text-green-700">Reports</span>
+        </h1>
+        <p className="text-gray-600 mb-6">
+          Monitor the status and progress of your submitted waste and water reports.
+        </p>
 
-      <div className="container mx-auto p-6 mt-1">
-        <h1 className="text-3xl text-black font-bold mb-6 text-primary">Track Reports</h1>
+        {/* Search & Filter */}
+        <div className="flex flex-col md:flex-row items-center gap-3 mb-8 bg-white shadow-sm p-4 rounded-lg">
+          <input
+            type="text"
+            placeholder="Search by title or location..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full md:flex-1 border border-gray-300 rounded-md px-4 py-2 text-sm focus:ring-1 focus:ring-green-600 outline-none"
+          />
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+          >
+            <option value="All">All Categories</option>
+            <option value="Waste">Waste</option>
+            <option value="Water">Water</option>
+          </select>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          {/* ✅ Waste Reports */}
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 text-green-700">Waste Reports</h2>
-
-            {wasteReports.map((r) => (
-              <Card key={r.id} className="mb-4 shadow">
-                <CardHeader className="space-y-1">
-                  <CardTitle className="text-lg font-semibold">{r.title}</CardTitle>
-
-                  {/* ✅ Status under title, small, compact */}
+        {/* Reports List */}
+        <div className="grid grid-cols-1 gap-6">
+          {visibleReports.map((r) => (
+            <Card
+              key={r.id + r.title}
+              className="bg-white shadow-md border border-gray-200 hover:shadow-lg transition-all"
+            >
+              <CardHeader className="flex flex-col space-y-1">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg font-semibold text-gray-900">
+                    {r.title}
+                  </CardTitle>
                   <Badge
                     className={`${getStatusColor(
                       r.status
-                    )} text-xs px-2 py-0.5 rounded-md w-fit`}
+                    )} text-white text-xs px-3 py-1 rounded-md`}
                   >
                     {r.status}
                   </Badge>
-                </CardHeader>
+                </div>
+              </CardHeader>
 
-                <CardContent>
-                  <p className="text-sm">📅 {r.date}</p>
-                  <p className="text-sm mb-2">📍 {r.location}</p>
+              <CardContent>
+                <div className="text-sm text-gray-600 space-y-1">
+                  <p>📅 {r.date}</p>
+                  <p>📍 {r.location}</p>
+                </div>
 
-                  <Button
-                    className="mt-2 bg-green-600 hover:bg-green-700"
-                    onClick={() => setOpenWaste(openWaste === r.id ? null : r.id)}
+                {/* 🔹 Replaced horizontal tracker with vertical timeline */}
+                <StatusTracker progress={r.progress} />
+
+                <Button
+                  variant="outline"
+                  className={`mt-3 ${
+                    r.type === "Water"
+                      ? "text-blue-700 border-blue-600 hover:bg-blue-600 hover:text-white"
+                      : "text-green-700 border-green-600 hover:bg-green-600 hover:text-white"
+                  }`}
+                  onClick={() =>
+                    setOpenReport(openReport === r.id ? null : r.id)
+                  }
+                >
+                  {openReport === r.id ? "Hide Details" : "View Details"}
+                </Button>
+
+                {openReport === r.id && (
+                  <div
+                    className={`mt-3 p-3 rounded-lg border ${
+                      r.type === "Water"
+                        ? "bg-blue-50 border-blue-200"
+                        : "bg-gray-50"
+                    }`}
                   >
-                    {openWaste === r.id ? "Hide Details" : "View Details"}
-                  </Button>
+                    <p className="text-sm text-gray-700 mb-3">{r.description}</p>
+                    <h4 className="font-semibold text-sm mb-2">
+                      Tracking Details:
+                    </h4>
+                    <ul className="text-xs text-gray-600 space-y-1">
+                      {r.history.map((h, i) => (
+                        <li key={i}>
+                          <span className="font-medium">{h.date}:</span>{" "}
+                          {h.update}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
 
-                  {openWaste === r.id && (
-                    <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
-                      <p className="text-sm">{r.description}</p>
-
-                      <div className="mt-3 text-center">
-                        <p className="text-xs font-semibold text-gray-700">Status Progress</p>
-                        <ProgressBar progress={r.progress} />
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* ✅ Water Reports */}
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 text-blue-700">Water Reports</h2>
-
-            {waterReports.map((r) => (
-              <Card key={r.id} className="mb-4 shadow">
-                <CardHeader className="space-y-1">
-                  <CardTitle className="text-lg font-semibold">{r.title}</CardTitle>
-
-                  <Badge
-                    className={`${getStatusColor(
-                      r.status
-                    )} text-xs px-2 py-0.5 rounded-md w-fit`}
-                  >
-                    {r.status}
-                  </Badge>
-                </CardHeader>
-
-                <CardContent>
-                  <p className="text-sm">📅 {r.date}</p>
-                  <p className="text-sm mb-2">📍 {r.location}</p>
-
-                  <Button
-                    className="mt-2 bg-blue-600 hover:bg-blue-700"
-                    onClick={() => setOpenWater(openWater === r.id ? null : r.id)}
-                  >
-                    {openWater === r.id ? "Hide Details" : "Details"}
-                  </Button>
-
-                  {openWater === r.id && (
-                    <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <p className="text-sm">{r.description}</p>
-
-                      <div className="mt-3 text-center">
-                        <p className="text-xs font-semibold text-gray-700">Status Progress</p>
-                        <ProgressBar progress={r.progress} />
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
+          {visibleReports.length === 0 && (
+            <p className="text-center text-gray-500 mt-10">
+              No reports found for the selected filters.
+            </p>
+          )}
         </div>
       </div>
     </>
