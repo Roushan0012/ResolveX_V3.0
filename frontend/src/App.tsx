@@ -9,6 +9,12 @@ import WaterTesting from "./pages/WaterTesting";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import NotFound from "./pages/NotFound";
 import FloatingChatModel from "@/components/FloatingChatModel";
+import TrackReports from "./pages/TrackReports";
+
+
+
+
+
 
 
 const queryClient = new QueryClient();
@@ -19,17 +25,20 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        {/* ✅ Floating Chatbot mounted globally */}
-        <FloatingChatModel />  
+  <FloatingChatModel />
 
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/report-waste" element={<ReportWaste />} />
-          <Route path="/water-testing" element={<WaterTesting />} />
-          <Route path="/leaderboard" element={<LeaderboardPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+  
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/report-waste" element={<ReportWaste />} />
+      <Route path="/water-testing" element={<WaterTesting />} />
+      <Route path="/leaderboard" element={<LeaderboardPage />} />
+      <Route path="/trackreports" element={<TrackReports />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+ 
+</BrowserRouter>
+
     </TooltipProvider>
   </QueryClientProvider>
 );
