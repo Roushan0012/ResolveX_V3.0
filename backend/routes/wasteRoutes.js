@@ -4,15 +4,20 @@ import { createWasteReport } from "../controllers/wasteController.js";
 
 const router = express.Router();
 
-// File storage setup
+// Configure multer for media upload
 const storage = multer.diskStorage({
-  destination: "uploads/",
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+  destination: (req, file, cb) => {
+    cb(null, "uploads/"); // Save inside backend/uploads folder
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + "-" + file.originalname);
+  },
 });
 
 const upload = multer({ storage });
 
-// POST /api/waste
-router.post("/", upload.array("media"), createWasteReport);
+// POST /waste/report
+router.post("/report", upload.array("media", 5), createWasteReport);
 
 export default router;

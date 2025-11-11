@@ -45,7 +45,8 @@ const ReportWaste = () => {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
-  const BACKEND_URL = import.meta.env.VITE_API_BASE; // change if deployed
+  const BACKEND_URL = import.meta.env.VITE_API_BASE;
+  const NODE_API = import.meta.env.VITE_NODE_API_BASE;
 
   useEffect(() => {
     return () => {
@@ -212,59 +213,66 @@ const ReportWaste = () => {
 
   // 🚀 Submit Report (after spam check)
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!files.length) {
-      toast({
-        title: "Missing Media",
-        description: "Please upload or capture at least one image.",
-        variant: "destructive",
-      });
-      return;
-    }
+  if (!files.length) {
+    toast({
+      title: "Missing Media",
+      description: "Please upload or capture at least one image.",
+      variant: "destructive",
+    });
+    return;
+  }
 
-    setIsAnalyzing(true);
-    const valid = await checkForSpam();
-    if (!valid) {
-      setIsAnalyzing(false);
-      return;
-    }
+  setIsAnalyzing(true);
 
-    // ✅ Proceed to actual report submission
+  try {
     const formData = new FormData();
-    formData.append("file", files[0]);
-    formData.append("kind", "image");
+    formData.append("wasteType", wasteType);
+    formData.append("location", location);
+    formData.append("landmark", landmark);
+    formData.append("description", description);
+    files.forEach((file) => formData.append("media", file));
 
-    try {
-      const res = await fetch(`${BACKEND_URL}/process`, {
-        method: "POST",
-        body: formData,
-      });
+    const res = await fetch(`${NODE_API}/api/waste/report`, {
+      method: "POST",
+      body: formData,
+    });
 
-      const data = await res.json();
-      toast({
-        title: "✅ Report Submitted",
-        description: `Category: ${data.issue_category}`,
-      });
+    const data = await res.json();
 
-      // Reset form
-      setFiles([]);
-      setPreviews([]);
-      setLocation("");
-      setWasteType("");
-      setLandmark("");
-      setDescription("");
-    } catch (err) {
-      console.error(err);
-      toast({
-        title: "Submission Failed",
-        description: "Unable to submit report. Try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
+    if (!res.ok) throw new Error(data.message || "Submission failed");
+
+    toast({
+      title: "✅ Report Submitted",
+      description: "Your waste report has been successfully stored.",
+    });
+
+    // Reset form
+    setFiles([]);
+    setPreviews([]);
+    setLocation("");
+    setWasteType("");
+    setLandmark("");
+    setDescription("");
+  } catch (err: unknown) {
+  console.error(err);
+  const message =
+    err instanceof Error
+      ? err.message
+      : "Unable to submit report. Try again later.";
+
+  toast({
+    title: "Submission Failed",
+    description: message,
+    variant: "destructive",
+  });
+}
+ finally {
+    setIsAnalyzing(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-background">
