@@ -10,17 +10,16 @@ import LeaderboardPage from "./pages/LeaderboardPage";
 import NotFound from "./pages/NotFound";
 import FloatingChatModel from "@/components/FloatingChatModel";
 import TrackReports from "./pages/TrackReports";
-
-
-
-
-
-
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <GoogleOAuthProvider clientId={googleClientId}>
+    <AuthProvider>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -40,6 +39,8 @@ const App = () => (
 </BrowserRouter>
 
     </TooltipProvider>
+    </AuthProvider>
+    </GoogleOAuthProvider>
   </QueryClientProvider>
 );
 
