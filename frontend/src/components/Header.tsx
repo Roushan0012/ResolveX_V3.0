@@ -8,6 +8,9 @@ import {
 } from "@/components/ui/sheet";
 import AccessibilityControls from "@/components/AccessibilityControls";
 import React, { useEffect, useState } from "react";
+import SudhaarLogo from "@/assets/sudhaar_logo.png";
+
+
 
 // US EPA AQI Breakpoints for PM2.5
 function calculateAqiPm25(pm25: number) {
@@ -151,10 +154,14 @@ const Header: React.FC = () => {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2 transition-base hover:opacity-80">
-            <div className="rounded-full bg-primary p-2">
-              <Leaf className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-foreground">SUDHAAR</span>
+           
+          <img
+    src={SudhaarLogo}
+    alt="Sudhaar Logo"
+    className="w-52 h-auto object-contain mr-4"
+   
+  />
+
           </Link>
           <AQIMeter />
         </div>
